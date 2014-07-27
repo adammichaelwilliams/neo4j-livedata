@@ -39,19 +39,8 @@ _.extend(DocFetcher.prototype, {
 
     Fiber(function () {
       try {
-//        var doc = self._mongoConnection.findOne(
-//          collectionName, {_id: id}) || null;
-        // XXX Rename get to _sync_get
-        var value = self._mongoConnection[method].apply(self._mongoConnection, [id]) || null;
-
-        var doc;
-        if (value) {
-          // XXX a hack to always box the value into Miniredis.Hash
-          if (method === 'hgetall') {
-            value = new Miniredis.Hash(value);
-          }
-          doc = { _id: id, value: value};
-        }
+        var doc = self._mongoConnection.findOne(
+          collectionName, {_id: id}) || null;
         // Return doc to all relevant callbacks. Note that this array can
         // continue to grow during callback excecution.
         while (!_.isEmpty(callbacks)) {
@@ -78,4 +67,4 @@ _.extend(DocFetcher.prototype, {
   }
 });
 
-RedisTest.DocFetcher = DocFetcher;
+//Neo4jTest.DocFetcher = DocFetcher;

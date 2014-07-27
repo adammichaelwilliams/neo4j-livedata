@@ -8,16 +8,16 @@
 // minutiae.
 
 Package.describe({
-  summary: "Adaptor for using Redis and Miniredis over DDP",
+  summary: "Adaptor for using Neo4j and Minimongo over DDP",
   internal: true
 });
 
 Npm.depends({
-  redis: "0.10.3"
+  neo4j: "1.1.0"
 });
 
 Package.on_use(function (api) {
-  api.use(['random', 'ejson', 'json', 'underscore', 'miniredis', 'logging',
+  api.use(['random', 'ejson', 'json', 'underscore', 'minimongo', 'logging',
            'livedata', 'deps', 'application-configuration', 'id-map'],
           ['client', 'server']);
   api.use('check', ['client', 'server']);
@@ -47,25 +47,26 @@ Package.on_use(function (api) {
   api.use('callback-hook', 'server');
 
   // Stuff that should be exposed via a real API, but we haven't yet.
-  api.export('RedisInternals', 'server');
+  api.export('Neo4jInternals', 'server');
   // For tests only.
-  api.export('RedisTest', 'server', {testOnly: true});
+  api.export('Neo4jTest', 'server', {testOnly: true});
 
-  api.add_files('sync_map.js', ['client', 'server']);
-  api.add_files('redis_commands.js', ['client', 'server']);
-  api.add_files(['redis_driver.js', 'oplog_tailing.js',
+//  api.add_files('sync_map.js', ['client', 'server']);
+  api.add_files('neo4j_commands.js', ['client', 'server']);
+  api.add_files(['neo4j_driver.js', 'oplog_tailing.js',
                  'observe_multiplex.js', 'doc_fetcher.js',
-                 'keyspace_notification_observe_driver.js',
-                 'redis_client.js',
-                 'redis_watcher.js'],
+                 'polling_observe_driver.js',
+                 'neo4j_client.js',
+                 'neo4j_watcher.js'],
                 'server');
   api.add_files('local_collection_driver.js', ['client', 'server']);
   api.add_files('remote_collection_driver.js', 'server');
-  api.add_files('redis_collection.js', ['client', 'server']);
+  api.add_files('neo4j_collection.js', ['client', 'server']);
 });
 
+/*
 Package.on_test(function (api) {
-  api.use('redis-livedata');
+  api.use('neo4j-livedata');
   api.use('check');
   api.use(['tinytest', 'underscore', 'test-helpers', 'ejson', 'random',
            'livedata']);
@@ -78,3 +79,4 @@ Package.on_test(function (api) {
   //api.add_files('oplog_tests.js', 'server');
   //api.add_files('doc_fetcher_tests.js', 'server');
 });
+*/

@@ -1,13 +1,13 @@
 var path = Npm.require('path');
 var Future = Npm.require(path.join('fibers', 'future'));
 
-RedisInternals.RemoteCollectionDriver = function (
+Neo4jInternals.RemoteCollectionDriver = function (
   url, options) {
   var self = this;
-  self.connection = new RedisConnection(url, options);
+  self.connection = new Neo4jConnection(url, options);
 };
 
-_.extend(RedisInternals.RemoteCollectionDriver.prototype, {
+_.extend(Neo4jInternals.RemoteCollectionDriver.prototype, {
   open: function (name) {
     var self = this;
     var ret = {};
@@ -17,13 +17,11 @@ _.extend(RedisInternals.RemoteCollectionDriver.prototype, {
        'dropCollection'],
       function (m) {
         ret[m] = function () {
-          throw new Error(m + ' is not available on REDIS! XXX');
+          throw new Error(m + ' is not available on NEO4J! XXX');
         };
       });
-      _.each(['keys', 'matching', 'get',
-              'set', 'setex', 'append', 'del',
-              'incr', 'incrby', 'incrbyfloat', 'decr', 'decrby',
-              '_observe', 'flushall'].concat(REDIS_COMMANDS_HASH),
+      _.each(['getNodeById', 'getIndexedNodes', 'createNode',
+              '_observe'].concat(NEO4J_COMMANDS_HASH),
         function (m) {
           ret[m] = function (/* args */) {
             var args = _.toArray(arguments);
@@ -42,7 +40,7 @@ _.extend(RedisInternals.RemoteCollectionDriver.prototype, {
 
             // XXX 'matching' method is a special case, because it returns a
             // cursor and cursors need to know what collection they belong to.
-            if (m === 'matching') {
+            if (m === 'getIndexedNodes') {
               args = [name].concat(args);
             }
 
@@ -76,24 +74,17 @@ meteorOnce = function(f) {
 // Create the singleton RemoteCollectionDriver only on demand, so we
 // only require Mongo configuration if it's actually used (eg, not if
 // you're only trying to receive data from a remote DDP server.)
-RedisInternals.defaultRemoteCollectionDriver = meteorOnce(function () {
-  var redisUrl = process.env.REDIS_URL;
-  if (!redisUrl) {
-    redisUrl = Meteor.settings.redisUrl;
-  }
-  if (!redisUrl) {
-    redisUrl = 'redis://127.0.0.1:6379';
-    Meteor._debug("Defaulting REDIS_URL to " + redisUrl);
-  }
-
+Neo4jInternals.defaultRemoteCollectionDriver = meteorOnce(function () {
+  var neo4jUrl = process.env.NEO4J_URL;
   var connectionOptions = {};
-  var configureKeyspaceNotifications = process.env.REDIS_CONFIGURE_KEYSPACE_NOTIFICATIONS;
-  if (!configureKeyspaceNotifications) {
-    configureKeyspaceNotifications = Meteor.settings.redisConfigureKeyspaceNotifications;
+
+  if (!neo4jUrl) {
+    neo4jUrl = Meteor.settings.neo4jUrl;
   }
-  if (configureKeyspaceNotifications) {
-    connectionOptions.configureKeyspaceNotifications = configureKeyspaceNotifications;
+  if (!neo4jUrl) {
+    neo4jUrl = '127.0.0.1:7474';
+    Meteor._debug("Defaulting NEO4J_URL to " + neo4jUrl);
   }
 
-  return new RedisInternals.RemoteCollectionDriver(redisUrl, connectionOptions);
+  return new Neo4jInternals.RemoteCollectionDriver(neo4jUrl, connectionOptions);
 });
