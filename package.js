@@ -53,7 +53,7 @@ Package.on_use(function (api) {
 
 //  api.add_files('sync_map.js', ['client', 'server']);
   api.add_files('neo4j_commands.js', ['client', 'server']);
-  api.add_files(['neo4j_driver_.js', 'oplog_tailing.js',
+  api.add_files(['neo4j_driver.js', 'oplog_tailing.js',
                  'observe_multiplex.js', 'doc_fetcher.js',
                  'polling_observe_driver.js',
                  'neo4j_client.js',
