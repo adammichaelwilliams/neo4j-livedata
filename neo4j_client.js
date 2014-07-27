@@ -20,7 +20,7 @@ Neo4jClient = function (url, options) {
   var host = parsedUrl.hostname || '127.0.0.1';
   var port = parseInt(parsedUrl.port || '7474');
   var db_url = host + ':' + port;
-  db_url = 'localhost:7474';
+  db_url = 'http://localhost:7474';
 
   self._connection = new Neo4jNpm.GraphDatabase(db_url);
 };
@@ -95,10 +95,26 @@ Neo4jClient.prototype.getNodeById = function (id, callback) {
 Neo4jClient.prototype.getIndexedNodes = function (index, callback) {
   var self = this;
 
+  console.log("get indexed nodes");
   self._connection.getIndexedNodes(INDEX_NAME, INDEX_KEY, INDEX_VAL, Meteor.bindEnvironment(function(err, nodes) {
       if(err) return callback(err); 
       
-      callback(null, nodes);
+      console.log("nodes index: " + index);
+      var items = _.map(nodes, function(node) {
+        if(node && node._data.data.title) {
+            return node;
+        }
+      });
+      _.each(items, function(node) {
+        if(node) {
+            console.dir(node._data.data.title);
+        }
+      });
+
+      console.dir(callback);
+//      console.dir(nodes);
+      Meteor.bindEnvironment( callback(null, nodes));
+      //callback(items);
   }));
 };
 

@@ -155,7 +155,7 @@ Meteor.Neo4jCollection = function (name, options) {
   if (Package.autopublish && !options._preventAutopublish && self._connection
       && self._connection.publish) {
     self._connection.publish(null, function () {
-      return self.getIndexedNodes();
+      return self.getIndexedNodes('collection_pattern');
     }, {is_auto: true});
   }
 };
@@ -466,11 +466,14 @@ _.each(["insert", "update", "remove"], function (name) {
 });
 
 // Returns a Cursor
-Meteor.Neo4jCollection.prototype.getIndexedNodes = function (pattern) {
+Meteor.Neo4jCollection.prototype.getIndexedNodes = function (pattern, cb) {
   var self = this;
-  return self._collection.getIndexedNodes(pattern);
+  console.log("collection prototype pattern: " + pattern);
+  console.log("collection prototype cb: " + cb);
+  return self._collection.getIndexedNodes(pattern, cb);
 };
-_.each(['getNodeById', 'getIndexedNodes', 'createNode'
+//_.each(['getNodeById', 'getIndexedNodes', 'createNode'
+_.each(['getNodeById', 'createNode'
         ].concat(NEO4J_COMMANDS_HASH), function (name) {
   Meteor.Neo4jCollection.prototype[name] = function (/* arguments */) {
     var self = this;

@@ -130,6 +130,11 @@ _.extend(PollingObserveDriver.prototype, {
 
     var first = false;
     var oldResults = self._results;
+    console.log("@@@@@@@@@@@@@@@@@ polling neo4j: ");
+    console.dir(oldResults);
+    if(oldResults && oldResults._map && oldResults._map['-'] && oldResults._map['-']._data) {
+      console.log(oldResults._map['-']._data.data);
+    }
     if (!oldResults) {
       first = true;
       // XXX maybe use OrderedDict instead?
