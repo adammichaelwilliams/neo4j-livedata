@@ -730,8 +730,8 @@ _.each(NEO4J_COMMANDS_LOCAL, function (method) {
   };
 });
 
-//_.each(["getNodeById", "getIndexedNodes", "createNode"
-_.each(["getNodeById", "createNode"
+_.each(["getNodeById", "getIndexedNodes", "createNode"
+//_.each(["getNodeById", "createNode"
         ].concat(NEO4J_COMMANDS_HASH), function (method) {
   if (_.has(NEO4J_COMMANDS_LOCAL, method)) {
     return;
@@ -875,7 +875,7 @@ _.each(['forEach', 'map', 'rewind', 'fetch', 'count'], function (method) {
     if (self._cursorDescription.options.tailable)
       throw new Error("Cannot call " + method + " on a tailable cursor");
 
-    if (!self._synchronousCursor) {
+//    if (!self._synchronousCursor) {
       self._synchronousCursor = self._connection._createSynchronousCursor(
         self._cursorDescription, {
           // Make sure that the "self" argument to forEach/map callbacks is the
@@ -883,7 +883,7 @@ _.each(['forEach', 'map', 'rewind', 'fetch', 'count'], function (method) {
           selfForIteration: self,
           useTransform: true
         });
-    }
+//    }
 
     return self._synchronousCursor[method].apply(
       self._synchronousCursor, arguments);
@@ -916,6 +916,7 @@ Cursor.prototype._getCollectionName = function () {
 Cursor.prototype.observe = function (callbacks) {
   var self = this;
   //return self._connection._observe(callbacks);
+  console.log("#### CHYEAH");
   var pattern = self._cursorDescription.pattern;
   return self._connection._observe(self._cursorDescription, callbacks);
 //  return LocalCollection._observeFromObserveChanges(self, callbacks);
@@ -988,16 +989,29 @@ Neo4jConnection.prototype._createSynchronousCursor = function(
     console.log("TODO inside SynchronousCursor 3");
     console.log("pattern: " + pattern);
     console.log("collectionName: " + collectionName);
-    collectionName = collectionName + "syncCursor";
+    //collectionName = collectionName + "syncCursor";
 
     db.getIndexedNodes(collectionName, future.resolver());
 
     console.log("TODO inside SynchronousCursor 3.6");
   });
+  var options = {};
+  options.neo4j = self;
   var entries = future.wait();
   console.log("entries!");
     console.log("TODO inside SynchronousCursor 4");
   return new SynchronousCursor(entries, cursorDescription, options);
+
+/*
+      self._synchronousCursor = self._connection._createSynchronousCursor(
+        self._cursorDescription, {
+          // Make sure that the "self" argument to forEach/map callbacks is the
+          // Cursor, not the SynchronousCursor.
+          selfForIteration: self,
+          useTransform: true
+        });/
+*/
+
 
 };
 
@@ -1011,6 +1025,7 @@ var SynchronousCursor = function (entries, cursorDescription, options) {
   self._entries = entries;
   self._pos = -1;
   self._cursorDescription = cursorDescription;
+  self._neo4j = options.neo4j;
   // The "self" argument passed to forEach/map callbacks. If we're wrapped
   // inside a user-visible Cursor, we want to provide the outer cursor!
 //  self._selfForIteration = options.selfForIteration || self;
@@ -1048,7 +1063,8 @@ _.extend(SynchronousCursor.prototype, {
       if (!doc) return null;
       doc = replaceTypes(doc, replaceNeo4jAtomWithMeteor);
 
-      if (!self._cursorDescription.options.tailable && _.has(doc, '_id')) {
+      //if (!self._cursorDescription.options.tailable && _.has(doc, '_id')) {
+      if (!self._cursorDescription.options.tailable && _.has(doc, 'id')) {
         // Did Mongo give us duplicate documents in the same cursor? If so,
         // ignore this one. (Do this before the transform, since transform might
         // return some unrelated value.) We don't do this for tailable cursors,
@@ -1069,6 +1085,8 @@ _.extend(SynchronousCursor.prototype, {
   forEach: function (callback, thisArg) {
     var self = this;
 
+
+    self._rewind();
     // We implement the loop ourself instead of using self._dbCursor.each,
     // because "each" will call its callback outside of a fiber which makes it
     // much more complex to make this function synchronous.
@@ -1090,11 +1108,13 @@ _.extend(SynchronousCursor.prototype, {
     return res;
   },
 
-  rewind: function () {
+  _rewind: function () {
     var self = this;
 
+
     // known to be synchronous
-    self._dbCursor.rewind();
+    //self._dbCursor.rewind();
+    self._pos = -1;
 
     self._visitedIds = new LocalCollection._IdMap;
   },
@@ -1125,7 +1145,10 @@ _.extend(SynchronousCursor.prototype, {
     } else {
       var results = new LocalCollection._IdMap;
       self.forEach(function (doc) {
-        results.set(doc._id, doc);
+        var init_id = doc.id.toString();
+        doc._id = init_id;
+        console.log(init_id);
+        results.set(init_id, doc);
       });
       return results;
     }

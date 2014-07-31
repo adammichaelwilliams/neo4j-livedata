@@ -64,7 +64,8 @@ PollingObserveDriver = function (options) {
     self._testOnlyPollCallback = options._testOnlyPollCallback;
   } else {
     var intervalHandle = Meteor.setInterval(
-      _.bind(self._ensurePollIsScheduled, self), 10 * 1000);
+      //_.bind(self._ensurePollIsScheduled, self), 10 * 1000);
+      _.bind(self._ensurePollIsScheduled, self), 1000);
     self._stopCallbacks.push(function () {
       Meteor.clearInterval(intervalHandle);
     });
@@ -130,8 +131,10 @@ _.extend(PollingObserveDriver.prototype, {
 
     var first = false;
     var oldResults = self._results;
-    console.log("@@@@@@@@@@@@@@@@@ polling neo4j: ");
-    console.dir(oldResults);
+    if(oldResults != null) {
+      console.log("@@@@@@@@@@@@@@@@@ polling neo4j: ");
+      console.dir(oldResults);
+    }
     if(oldResults && oldResults._map && oldResults._map['-'] && oldResults._map['-']._data) {
       console.log(oldResults._map['-']._data.data);
     }
@@ -147,6 +150,8 @@ _.extend(PollingObserveDriver.prototype, {
     var writesForCycle = self._pendingWrites;
     self._pendingWrites = [];
 
+    self._synchronousCursor = self._neo4jHandle._createSynchronousCursor(
+      self._cursorDescription);
     // Get the new query results. (This yields.)
     try {
       var newResults = self._synchronousCursor.getRawObjects(self._ordered);

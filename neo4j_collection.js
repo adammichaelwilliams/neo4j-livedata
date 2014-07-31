@@ -95,7 +95,8 @@ Meteor.Neo4jCollection = function (name, options) {
       update: function (msg) {
         //var mongoId = LocalCollection._idParse(msg.id);
         var id = msg.id;
-        var doc = self._collection.getNodeById(id);
+//        var doc = self._collection.getNodeById(id);
+        var doc = self._collection.findOne(id);
 
         // Is this a "replace the whole doc" message coming from the quiescence
         // of method writes to an object? (Note that 'undefined' is a valid
@@ -112,7 +113,8 @@ Meteor.Neo4jCollection = function (name, options) {
           if (doc) {
             throw new Error("Expected not to find a document already present for an add");
           }
-          self._collection.createNode(id, msg.fields);
+          //self._collection.createNode(id, msg.fields);
+          self._collection.insert(_.extend({_id: id}, msg.fields));
         } else if (msg.msg === 'removed') {
           if (!doc)
             throw new Error("Expected to find a document already present for removed");
@@ -226,7 +228,7 @@ Meteor.Neo4jCollection._publishCursor = function (cursor, sub, collection) {
       sub.changed(collection, id, fields);
     },
     removed: function (id) {
-      sub.removed(collection, id);
+//sub.removed(collection, id);
     }
   });
 
@@ -465,6 +467,12 @@ _.each(["insert", "update", "remove"], function (name) {
   };
 });
 
+Meteor.Neo4jCollection.prototype.find = function (pattern, cb) {
+  var self = this;
+  console.log("collection prototype pattern: " + pattern);
+  console.log("collection prototype cb: " + cb);
+  return self._collection.find({});
+}
 // Returns a Cursor
 Meteor.Neo4jCollection.prototype.getIndexedNodes = function (pattern, cb) {
   var self = this;
@@ -472,8 +480,8 @@ Meteor.Neo4jCollection.prototype.getIndexedNodes = function (pattern, cb) {
   console.log("collection prototype cb: " + cb);
   return self._collection.getIndexedNodes(pattern, cb);
 };
-//_.each(['getNodeById', 'getIndexedNodes', 'createNode'
-_.each(['getNodeById', 'createNode'
+_.each(['getNodeById', 'getIndexedNodes', 'createNode'
+//_.each(['getNodeById', 'createNode'
         ].concat(NEO4J_COMMANDS_HASH), function (name) {
   Meteor.Neo4jCollection.prototype[name] = function (/* arguments */) {
     var self = this;
