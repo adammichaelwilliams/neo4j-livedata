@@ -4,7 +4,11 @@ The goal of this package is to bring native graph support to Meteor applications
 
 ## Installation
 
-This is not nearly complete, do not use!
+DO NOT USE! This is not nearly complete.
+
+## minineo4j
+
+Eventually to be used with https://github.com/davidfurlong/minineo4j
 
 ## Neo4jCollection
 
