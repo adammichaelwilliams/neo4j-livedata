@@ -96,6 +96,25 @@ Neo4jClient.prototype.getIndexedNodes = function (index, callback) {
   var self = this;
 
   console.log("get indexed nodes");
+  var query = [
+        'MATCH (node:Person)',
+        'RETURN node'
+      ].join('\n');
+
+    var params = {};
+
+    var nodes = [];
+    self._connection.query(query, params, Meteor.bindEnvironment(function(err, res) {
+        _.each(res, function(node) {
+            console.log(node.node);
+            nodes.push(node.node);
+        });
+        console.log("nodes: ");
+        console.log(nodes);
+        Meteor.bindEnvironment( callback(null, nodes));
+    }));
+
+  /*
   self._connection.getIndexedNodes(INDEX_NAME, INDEX_KEY, INDEX_VAL, Meteor.bindEnvironment(function(err, nodes) {
       if(err) return callback(err); 
       
@@ -116,6 +135,7 @@ Neo4jClient.prototype.getIndexedNodes = function (index, callback) {
       Meteor.bindEnvironment( callback(null, nodes));
       //callback(items);
   }));
+  */
 };
 
 Neo4jClient.prototype.createNode = function (data, callback) {
