@@ -34,3 +34,6 @@ Right now it is known that the following things don't work:
 - basically everything
 - we've made a lot of progress, but haven't gotten as far as we planned
 
+## Contributing
+
+We could really do with some help. If you're interested, let us know!
