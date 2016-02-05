@@ -1,4 +1,4 @@
-# Neo4j Livedata
+# Neo4j Livedata [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 
 The goal of this package is to bring native graph support to Meteor applications
 
